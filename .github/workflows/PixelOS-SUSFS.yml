@@ -93,7 +93,7 @@ jobs:
         if: github.event.inputs.KERNELSU_CONFIG == 'true'
         run: |
           cd $GITHUB_WORKSPACE/kernel
-          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
+          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
           scripts/config --file "arch/arm64/configs/${{ github.event.inputs.KERNEL_DEFCONFIG }}" -e MODULES -e KPROBES -e HAVE_KPROBES -e KPROBE_EVENTS
 
       - name: Make kernel
