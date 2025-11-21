@@ -1,4 +1,4 @@
-name: Pixel OS SUSFS
+name: Pixel OS SUSFS Kpm
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ on:
       KERNELSU_TAG:
         description: 'Choose KernelSU branch or tag'
         required: false
-        default: "0af1ab28450a1df548850b4a05ba82a5cbef478e"
+        default: "main"
         type: string
 
 jobs:
