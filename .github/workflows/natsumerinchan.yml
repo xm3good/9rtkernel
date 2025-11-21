@@ -1,4 +1,4 @@
-name: Pixel natsumerinchan
+name: Pixel OS SUSFS
 
 
 on:
@@ -13,12 +13,12 @@ on:
         KERNEL_SOURCE:
           description: 'Kernel Source'
           required: true
-          default: "https://github.com/natsumerinchan/kernel_oneplus_martini.git"
+          default: "https://github.com/natsumerinchan/android_kernel_oneplus_sm8350.git"
           type: string
         KERNEL_SOURCE_BRANCH:
           description: 'kernel Branch'
           required: true
-          default: "thirteen"
+          default: "fourteen-qpr3"
           type: string
         KERNEL_DEFCONFIG:
           description: 'Kernel Config'
@@ -29,7 +29,7 @@ on:
           description: 'Compile KernelSU'
           required: true
           default: true
-          type: boolean
+          type: boolean          
         CCACHE_CONFIG:
           description: 'Use Ccache'
           required: true
@@ -38,7 +38,7 @@ on:
         KERNELSU_TAG:
           description: 'Choose KernelSU branch or tag'
           required: false
-          default: "a943528d8203f2bcd524bddb273fb3c00905ea67"
+          default: "0af1ab28450a1df548850b4a05ba82a5cbef478e"
           type: string
 
 jobs:
@@ -52,7 +52,6 @@ jobs:
       CCACHE_MAXSIZE: "2G"
       CCACHE_HARDLINK: "true"
 
-      
     steps:
 
       - uses: actions/checkout@v4
@@ -61,7 +60,7 @@ jobs:
         if: github.event.inputs.CCACHE_CONFIG == 'true'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: Pixel-Experience
+          key: PixelOS-inline
 
       - name: Setup Environment
         run: |
@@ -116,9 +115,9 @@ jobs:
           echo "=========================Make=========================="
           make O=out CC="ccache clang" CXX="ccache clang++" ARCH=arm64 CROSS_COMPILE=$CLANG_PATH/bin/aarch64-linux-gnu- CROSS_COMPILE_ARM32=$CLANG_PATH/bin/arm-linux-gnueabi- LD=ld.lld $KERNEL_DEFCONFIG
           # Disable LTO
-          # if [[ $(echo "$(awk '/MemTotal/ {print $2}' /proc/meminfo) < 16000000" | bc -l) -eq 1 ]]; then
+          if [[ $(echo "$(awk '/MemTotal/ {print $2}' /proc/meminfo) < 16000000" | bc -l) -eq 1 ]]; then
               scripts/config --file out/.config -d LTO -d LTO_CLANG -d THINLTO -e LTO_NONE
-          # fi
+          fi
           make O=out CC="ccache clang" CXX="ccache clang++" ARCH=arm64 -j`nproc` CROSS_COMPILE=$CLANG_PATH/bin/aarch64-linux-gnu- CROSS_COMPILE_ARM32=$CLANG_PATH/bin/arm-linux-gnueabi- LD=ld.lld 2>&1 | tee kernel.log
 
       
@@ -128,7 +127,7 @@ jobs:
           export KERNEL_PATH=$PWD
           git clone https://gitlab.com/inferno0230/AnyKernel3.git --depth=1 $KERNEL_PATH/AnyKernel3
           if test -e $KERNEL_PATH/out/arch/arm64/boot/Image && test -d $KERNEL_PATH/AnyKernel3; then
-             zip_name="PE-martini-${{ env.TAG_NAME }}.zip"
+             zip_name="PixelOS-SUSFS-martini-${{ env.TAG_NAME }}.zip"
              cd $KERNEL_PATH/AnyKernel3
              cp $KERNEL_PATH/out/arch/arm64/boot/Image $KERNEL_PATH/AnyKernel3
              zip -r ${zip_name} *
@@ -138,7 +137,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PE-martini-${{ env.TAG_NAME }}
+          name: PixelOS-SUSFS-martini-${{ env.TAG_NAME }}
           path: |
             kernel/AnyKernel3/*
 
@@ -146,9 +145,9 @@ jobs:
         if: github.event.inputs.RELEASE_CONFIG == 'true'
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "kernel/out/arch/arm64/boot/PE-martini-${{ env.TAG_NAME }}.zip"
-          tag: "ONEPLUS9RT-PE-${{ env.TAG_NAME }}"
-          name: "Pixel Experience martini ${{ env.TAG_NAME }}"
+          artifacts: "kernel/out/arch/arm64/boot/PixelOS-SUSFS-martini-${{ env.TAG_NAME }}.zip"
+          tag: "ONEPLUS9RT-PixelOS-SUSFS-${{ env.TAG_NAME }}"
+          name: "PixelOS SUSFS martini ${{ env.TAG_NAME }}"
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
